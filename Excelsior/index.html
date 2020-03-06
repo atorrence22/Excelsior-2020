@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Team Excelsior</title>
+    <link rel="stylesheet" href="css/bulma.css">
+    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+    <script src="Dependencies/jquery-3.4.1.min.js" ></script>
+    <script src="Dependencies/xlsx.full.min.js"></script>
+    <script src="Dependencies/plotly-latest.min.js"></script>
+    <script>if (window.module) module = window.module;</script>
+
+    <!-- OR use a specific plotly.js release (e.g. version 1.5.0) -->
+    <script src="https://kit.fontawesome.com/24bd548384.js" crossorigin="anonymous"></script>
+    <style>
+            .collapsible {
+              background-color: #777;
+              color: white;
+              cursor: pointer;
+              padding: 18px;
+              width: 100%;
+              border: none;
+              text-align: left;
+              outline: none;
+              font-size: 15px;
+            }
+
+            .active, .collapsible:hover {
+              background-color: #555;
+            }
+
+            .collapsible:after {
+              content: '\002B';
+              color: white;
+              font-weight: bold;
+              float: right;
+              margin-left: 5px;
+            }
+
+            .active:after {
+              content: "\2212";
+            }
+
+            .content {
+              padding: 0 18px;
+              max-height: 0;
+              overflow: hidden;
+              transition: max-height 0.2s ease-out;
+              background-color: #f1f1f1;
+            }
+            </style>
+  </head>
+  <body>
+  <section class="section level has-background-white">
+    <div class=level-left>
+        <img src="img/logo.png" class="level-item" style="width:auto; height:auto; max-width:150px; max-height:60px; padding-right: 20px">
+    </div>
+    <div class="container">
+      <h1 class="title">
+        ABET Data Visulaizer
+      </h1>
+      <p class="subtitle">
+        Created by Team Excelsior
+      </p>
+    </div>
+    <div class="level-right">
+        <img src="img/build.png" style="padding-right: 5px">
+        <p class="level-item">Config</p>
+    </div>
+  </section>
+  <section class="section has-background-link">
+    <div class="columns">
+        <div class="column">
+            <div class="box is-half has-background-light">
+                <button class="button"><img src="img/add.png" style="padding-right: 5px">Add Learning Outcome</button><br><br>
+                <div id="navbar"><span>Select ABET data file (only supports 1 file currently)</span></div>
+                <div id="wrapper">
+                  <input type="file" id="input-excel">Choose a Excel file</input>
+                </div>
+                <br>
+                <button onclick="createGraph()">Generate Plotly Graph</button>
+                <button onclick="consoleTest()">Test Cell Value</button>
+            </div>
+        <!--</div>
+        <div class="column">-->
+            <div class="box is-half has-background-light">
+                <button type="button" class="collapsible">Learning Outcome 1</button>
+                <div class="content">
+                    <p style="padding-top: 10px">
+                        Sample text to briefly explain this learning outcome.
+                    </p>
+                    <div class="table is-narrow is-hoverable is-fullwidth">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Course #</th>
+                                    <th>Data Collected</th>
+                                    <th>Performance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><a href="">Spring543</a></td>
+                                    <td>
+                                        <span class="icon has-text-success">
+                                            <i class="fas fa-check-square"></i>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="icon has-text-success">
+                                            <i class="fas fa-check-square"></i>
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><a href="">Spring410</a></td>
+                                    <td>
+                                        <span class="icon has-text-warning">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="icon has-text-danger">
+                                            <i class="fas fa-ban"></i>
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><a href="">Spring685</a></td>
+                                    <td>
+                                        <span class="icon has-text-success">
+                                            <i class="fas fa-check-square"></i>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="icon has-text-danger">
+                                            <i class="fas fa-ban"></i>
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <button type="button" class="collapsible">Learning Outcome 2</button>
+                <div class="content">
+                    <p style="padding-top: 10px">
+                        Sample text to briefly explain this learning outcome.
+                    </p>
+                        <div class="table is-narrow is-hoverable is-fullwidth">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Course #</th>
+                                            <th>Data Collected</th>
+                                            <th>Performance</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><a href="">Spring543</a></td>
+                                            <td>
+                                                <span class="icon has-text-success">
+                                                    <i class="fas fa-check-square"></i>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="icon has-text-success">
+                                                    <i class="fas fa-check-square"></i>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><a href="">Spring410</a></td>
+                                            <td>
+                                                <span class="icon has-text-warning">
+                                                    <i class="fas fa-exclamation-triangle"></i>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="icon has-text-danger">
+                                                    <i class="fas fa-ban"></i>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><a href="">Spring685</a></td>
+                                            <td>
+                                                <span class="icon has-text-success">
+                                                    <i class="fas fa-check-square"></i>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="icon has-text-danger">
+                                                    <i class="fas fa-ban"></i>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                </div>
+                <button type="button" class="collapsible">Learning Outcome 3</button>
+                <div class="content">
+                        <p style="padding-top: 10px">
+                            Sample text to briefly explain this learning outcome.
+                        </p>
+                        <div class="table is-narrow is-hoverable is-fullwidth">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Course #</th>
+                                            <th>Data Collected</th>
+                                            <th>Performance</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><a href="">Spring543</a></td>
+                                            <td>
+                                                <span class="icon has-text-success">
+                                                    <i class="fas fa-check-square"></i>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="icon has-text-success">
+                                                    <i class="fas fa-check-square"></i>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><a href="">Spring410</a></td>
+                                            <td>
+                                                <span class="icon has-text-warning">
+                                                    <i class="fas fa-exclamation-triangle"></i>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="icon has-text-danger">
+                                                    <i class="fas fa-ban"></i>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><a href="">Spring685</a></td>
+                                            <td>
+                                                <span class="icon has-text-success">
+                                                    <i class="fas fa-check-square"></i>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="icon has-text-danger">
+                                                    <i class="fas fa-ban"></i>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                </div>
+            </div>
+        </div>
+        <div class="column">
+            <div class="box is-half has-background-light">
+                Placeholder for future course viewer feature.
+            </div>
+            <div id='myDiv' style="width:600px;height:500px;">
+        </div>
+    </div>
+  </section>
+  <script>
+    var coll = document.getElementsByClassName("collapsible");
+    var i;
+    var excel_file = $('#input-excel');
+
+    for (i = 0; i < coll.length; i++) {
+        coll[i].addEventListener("click", function() {
+        this.classList.toggle("active");
+        var content = this.nextElementSibling;
+        if (content.style.maxHeight){
+            content.style.maxHeight = null;
+        } else {
+            content.style.maxHeight = content.scrollHeight + "px";
+        }
+        });
+    }
+    var le1 = [];
+    var le2 = [];
+    var le3 = [];
+    var le4 = [];
+
+    var sum1;
+    var sum2;
+    var sum3;
+    var sum4;
+
+    var wle1 = [];
+    var wle2 = [];
+    var wle3 = [];
+    var wle4 = [];
+
+
+          excel_file.change(function(e){
+                  var reader = new FileReader();
+                  reader.readAsArrayBuffer(e.target.files[0]);
+                  reader.onload = function(e) {
+                          var data = new Uint8Array(reader.result);
+                          var wb = XLSX.read(data,{type:'array'});
+
+                          var first_sheet = wb.SheetNames[0];
+                          var ws = wb.Sheets[first_sheet];
+
+                          var cell1 = ws['C59'];
+                          le1[0] = (cell1 ? cell1.v :undefined);
+                          var cell2 = ws['D59'];
+                          le1[1] = (cell2 ? cell2.v :undefined);
+                          var cell3 = ws['E59'];
+                          le1[2] = (cell3 ? cell3.v :undefined);
+                          var cell4 = ws['F59'];
+                          le1[3] = (cell4 ? cell4.v :undefined);
+                          var cell5 = ws['G59'];
+                          le1[4] = (cell5 ? cell5.v :undefined);
+
+                          var cell1 = ws['C60'];
+                          le2[0] = (cell1 ? cell1.v :undefined);
+                          var cell2 = ws['D60'];
+                          le2[1] = (cell2 ? cell2.v :undefined);
+                          var cell3 = ws['E60'];
+                          le2[2] = (cell3 ? cell3.v :undefined);
+                          var cell4 = ws['F60'];
+                          le2[3] = (cell4 ? cell4.v :undefined);
+                          var cell5 = ws['G60'];
+                          le2[4] = (cell5 ? cell5.v :undefined);
+
+                          var cell1 = ws['C61'];
+                          le3[0] = (cell1 ? cell1.v :undefined);
+                          var cell2 = ws['D61'];
+                          le3[1] = (cell2 ? cell2.v :undefined);
+                          var cell3 = ws['E61'];
+                          le3[2] = (cell3 ? cell3.v :undefined);
+                          var cell4 = ws['F61'];
+                          le3[3] = (cell4 ? cell4.v :undefined);
+                          var cell5 = ws['G61'];
+                          le3[4] = (cell5 ? cell5.v :undefined);
+
+                          var cell1 = ws['C62'];
+                          le4[0] = (cell1 ? cell1.v :undefined);
+                          var cell2 = ws['D62'];
+                          le4[1] = (cell2 ? cell2.v :undefined);
+                          var cell3 = ws['E62'];
+                          le4[2] = (cell3 ? cell3.v :undefined);
+                          var cell4 = ws['F62'];
+                          le4[3] = (cell4 ? cell4.v :undefined);
+                          var cell5 = ws['G62'];
+                          le4[4] = (cell5 ? cell5.v :undefined);
+
+                          sum1 = le1[0] + le2[0] + le3[0] + le4[0];
+                          sum2 = le1[1] + le2[1] + le3[1] + le4[1];
+                          sum3 = le1[2] + le2[2] + le3[2] + le4[2];
+                          sum4 = le1[3] + le2[3] + le3[3] + le4[3];
+
+                          wle1 = [parseInt(le1[0]/sum1), parseInt(le1[1]/sum2), parseInt(le1[2]/sum3), parseInt(le1[3]/sum4)];
+                          wle2 = [parseInt(le2[0]/sum1), parseInt(le2[1]/sum2), parseInt(le2[2]/sum3), parseInt(le2[3]/sum4)];
+                          wle3 = [parseInt(le3[0]/sum1), parseInt(le3[1]/sum2), parseInt(le3[2]/sum3), parseInt(le3[3]/sum4)];
+                          wle4 = [parseInt(le4[0]/sum1), parseInt(le4[1]/sum2), parseInt(le4[2]/sum3), parseInt(le4[3]/sum4)];
+                  }
+          });
+
+
+
+
+
+    function consoleTest() {
+      console.log(cell1_val);
+    }
+
+    var trace1 = {
+      x: ['CS 301.3.1', 'CS 301.3.2', 'CS 301.3.3', 'CS 301.4.1', 'CS 301.4.2'],
+      y: le1,
+      name: '>= 4',
+      type: 'bar'
+    };
+
+    var trace2 = {
+      x: ['CS 301.3.1', 'CS 301.3.2', 'CS 301.3.3', 'CS 301.4.1', 'CS 301.4.2'],
+      y: le2,
+      name: '>=3',
+      type: 'bar'
+    };
+
+    var trace3 = {
+      x: ['CS 301.3.1', 'CS 301.3.2', 'CS 301.3.3', 'CS 301.4.1', 'CS 301.4.2'],
+      y: le3,
+      name: '>=2',
+      type: 'bar'
+    };
+
+    var trace4 = {
+      x: ['CS 301.3.1', 'CS 301.3.2', 'CS 301.3.3', 'CS 301.4.1', 'CS 301.4.2'],
+      y: le4,
+      name: '>=1',
+      type: 'bar'
+    };
+
+    var data = [trace1, trace2, trace3, trace4];
+
+    var layout = {
+      title: 'Distribution of Scores for CS301.3 Performance <br> Indicators in Spring 2018 (n=63)',
+      font:{ family: 'Raleway, sans-serif' },
+      barmode: 'stack'
+    };
+
+    function createGraph() {
+      Plotly.newPlot('myDiv', data, layout);
+
+      console.log(sum1)
+
+      console.log(wle1)
+
+    }
+
+    </script>
+  </body>
+</html>
