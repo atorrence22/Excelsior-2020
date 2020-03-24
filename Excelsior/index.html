@@ -58,7 +58,7 @@
     </div>
     <div class="container">
       <h1 class="title">
-        ABET Data Visulaizer
+        AMTV - ABET Monitoring Tool & Visualization
       </h1>
       <p class="subtitle">
         Created by Team Excelsior
@@ -74,13 +74,12 @@
         <div class="column">
             <div class="box is-half has-background-light">
                 <button class="button"><img src="img/add.png" style="padding-right: 5px">Add Learning Outcome</button><br><br>
-                <div id="navbar"><span>Select ABET data file (only supports 1 file currently)</span></div>
+                <div id="navbar"><span>Select ABET data file</span></div>
                 <div id="wrapper">
                   <input type="file" id="input-excel">Choose a Excel file</input>
                 </div>
                 <br>
-                <button onclick="createGraph()">Generate Plotly Graph</button>
-                <button onclick="consoleTest()">Test Cell Value</button>
+                <!-- <button onclick="createGraph('myDiv1')">Generate Plotly Graph</button> -->
             </div>
         <!--</div>
         <div class="column">-->
@@ -265,7 +264,21 @@
             <div class="box is-half has-background-light">
                 Placeholder for future course viewer feature.
             </div>
-            <div id='myDiv' style="width:600px;height:500px;">
+            <div id='myDiv1' style="width:600px;height:500px;">
+        </div>
+            <div id='myDiv2' style="width:600px;height:500px;">
+        </div>
+            <div id='myDiv3' style="width:600px;height:500px;">
+        </div>
+            <div id='myDiv4' style="width:600px;height:500px;">
+        </div>
+            <div id='myDiv5' style="width:600px;height:500px;">
+        </div>
+            <div id='myDiv6' style="width:600px;height:500px;">
+        </div>
+            <div id='myDiv7' style="width:600px;height:500px;">
+        </div>
+            <div id='myDiv8' style="width:600px;height:500px;">
         </div>
     </div>
   </section>
@@ -286,180 +299,228 @@ var excel_file = $('#input-excel');
         });
     }
 
-var le1 = [];
-var le2 = [];
-var le3 = [];
-var le4 = [];
-
-var sum1 = le1[0] + le2[0] + le3[0] + le4[0];
-var sum2 = le1[1] + le2[1] + le3[1] + le4[1];
-var sum3 = le1[2] + le2[2] + le3[2] + le4[2];
-var sum4 = le1[3] + le2[3] + le3[3] + le4[3];
-
-var wle1 = [];
-var wle2 = [];
-var wle3 = [];
-var wle4 = [];
-
-wle1 = [parseInt(le1[0]/sum1), parseInt(le1[1]/sum2), parseInt(le1[2]/sum3), parseInt(le1[3]/sum4)];
-wle2 = [parseInt(le2[0]/sum1), parseInt(le2[1]/sum2), parseInt(le2[2]/sum3), parseInt(le2[3]/sum4)];
-wle3 = [parseInt(le3[0]/sum1), parseInt(le3[1]/sum2), parseInt(le3[2]/sum3), parseInt(le3[3]/sum4)];
-wle4 = [parseInt(le4[0]/sum1), parseInt(le4[1]/sum2), parseInt(le4[2]/sum3), parseInt(le4[3]/sum4)];
+var le1;
+var le2;
+var le3;
+var le4;
 
 var albet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
  'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
 
 var learnObjTitleArr;
 
+function createWorkBook(excelSheet, sheetNum) {
+  excelSheet.change(function(e){
+          var reader = new FileReader();
+          reader.readAsArrayBuffer(e.target.files[0]);
+          reader.onload = function(e) {
+            var queueText = "Summary";
+            var queueCell;
+            var cellRow;
+            var cellCol;
+            var lObjTitles = [];
 
-excel_file.change(function(e){
-        var reader = new FileReader();
-        reader.readAsArrayBuffer(e.target.files[0]);
-        reader.onload = function(e) {
-                var queueText = "Summary";
-                var queueCell;
-                var cellRow;
-                var cellCol;
-                var lObjTitles = [];
+            var data = new Uint8Array(reader.result);
+            var wb = XLSX.read(data,{type:'array'});
 
-                var data = new Uint8Array(reader.result);
-                var wb = XLSX.read(data,{type:'array'});
+            var sheets = wb.SheetNames;
+            var sheetsArr = [];
+            var wsArr = [];
+            var divArr = ['myDiv1', 'myDiv2', 'myDiv3', 'myDiv4', 'myDiv5', 'myDiv6', 'myDiv7', 'myDiv8']
+            for (var i = 2; i < (sheets.length - 3); i++) {
+              sheetsArr.push(sheets[sheetNum + i]);
+            }
+            sheetsArr.push(sheets[sheetNum]);
+            sheetsArr.push(sheets[sheetNum + 1]);
 
-                var first_sheet = wb.SheetNames[0];
-                var ws = wb.Sheets[first_sheet];
+            for (var j = 2; j < (sheets.length - 3); j++) {
+              wsArr.push(wb.Sheets[sheetsArr[j]]);
+            }
+            wsArr.push(wb.Sheets[sheetsArr[0]]);
+            wsArr.push(wb.Sheets[sheetsArr[1]]);
 
-                var range = XLSX.utils.decode_range(ws['!ref']); // get the range
-                for(var R = range.s.r; R <= range.e.r; ++R) {
-                  for(var C = range.s.c; C <= range.e.c; ++C) {
-                    /* find the cell object */
-                    var cellref = XLSX.utils.encode_cell({c:C, r:R}); // construct A1 reference for cell
-                    if(!ws[cellref]) continue; // if cell doesn't exist, move on
-                    var cell = ws[cellref];
+            function createGraph(div, sheetName) {
+              var wle1 = [];
+              var wle2 = [];
+              var wle3 = [];
+              var wle4 = [];
+              var wleArr = [wle1, wle2, wle3, wle4];
+              var tempSum;
 
-                    /* if the cell is a text cell with the old string, change it */
-                    if(!(cell.t == 's' || cell.t == 'str')) continue; // skip if cell is not text
-                    if(cell.v === queueText) queueCell = cellref; // change the cell value
+              // console.log(le1);
+
+              for (var i = 0; i < le1.length; i++) {
+                var temp1 = le1[i];
+                var temp2 = le2[i];
+                var temp3 = le3[i];
+                var temp4 = le4[i];
+                tempSum = temp1 + temp2 + temp3 + temp4;
+                wle1.push((le1[i]/tempSum) * 100);
+                wle2.push((le2[i]/tempSum) * 100);
+                wle3.push((le3[i]/tempSum) * 100);
+                wle4.push((le4[i]/tempSum) * 100);
+              }
+
+              var xArr = [];
+              var i;
+              for (i = 0; i < learnObjTitleArr.length; i++) {
+                xArr.push(learnObjTitleArr[i]);
+              }
+
+              var trace1 = {
+                x: xArr,
+                y: wle1,
+                name: '>= 4',
+                type: 'bar'
+              };
+
+              var trace2 = {
+                x: xArr,
+                y: wle2,
+                name: '>= 3',
+                type: 'bar',
+                marker: {
+                  color: 'rgb(158,202,225)'
+                }
+              };
+
+              var trace3 = {
+                x: xArr,
+                y: wle3,
+                name: '>= 2',
+                type: 'bar',
+                marker: {
+                  color: 'rgb(150,150,0)'
+                }
+              };
+
+              var trace4 = {
+                x: xArr,
+                y: wle4,
+                name: '>= 1',
+                type: 'bar'
+              };
+
+              var data = [trace1, trace2, trace3, trace4];
+
+              var layout = {
+                title: 'Distribution of Scores for '.concat(sheetName),
+                font:{ family: 'Raleway, sans-serif' },
+                barmode: 'stack'
+              };
+
+              Plotly.newPlot(div, data, layout);
+
+            }
+
+            function multiSheet(ws, div, sheetName) {
+
+              var range = XLSX.utils.decode_range(ws['!ref']); // get the range
+              for(var R = range.s.r; R <= range.e.r; ++R) {
+                for(var C = range.s.c; C <= range.e.c; ++C) {
+                  /* find the cell object */
+                  var cellref = XLSX.utils.encode_cell({c:C, r:R}); // construct A1 reference for cell
+                  if(!ws[cellref]) continue; // if cell doesn't exist, move on
+                  var cell = ws[cellref];
+
+                  /* if the cell is a text cell with the old string, change it */
+                  if(!(cell.t == 's' || cell.t == 'str')) continue; // skip if cell is not text
+                  if(cell.v === queueText) queueCell = cellref; // change the cell value
+                }
+              }
+
+              if (queueCell.length == 3) { //checks queue cell length and creates 2 variables for queueCell row and column
+                var s1 = queueCell[1];
+                var s2 = queueCell[2];
+                cellRow = s1.concat(s2);
+                cellCol = queueCell[0];
+              } else if(queueCell.length == 2) {
+                cellRow = queueCell[1];
+                cellCol = queueCell[0];
+              }
+              else if (queueCell.length == 4) {
+                var s1 = queueCell[1];
+                var s2 = queueCell[2];
+                var s3 = queueCell[3];
+                var st = s1.concat(s2);
+                cellRow = st.concat(s3);
+                cellCol = queueCell[0];
+              }
+
+
+              function nextColVal(curCol) { //this takes in a str of a col and returns VALUE of next item
+                var cnt = 0;
+                var nxtCol;
+                var i;
+                for (i = 0; i < albet.length; i++) {
+                  if (albet[i] == curCol) {
+                    cnt++;
+                    nxtCol = albet[cnt];
+                    break;
+                  } else {
+                    cnt++;
                   }
                 }
+                return nxtCol;
+              }
 
-                if (queueCell.length == 3) { //checks queue cell length and creates 2 variables for queueCell row and column
-                  var s1 = queueCell[1];
-                  var s2 = queueCell[2];
-                  cellRow = s1.concat(s2);
-                  cellCol = queueCell[0];
-                } else if(queueCell.length == 2) {
-                  cellRow = queueCell[1];
-                  cellCol = queueCell[0];
+              function createlObjArr(summaryCellRow, summaryCellCol) { //creates an array of the learning objectives for this class
+                var nxtCol = nextColVal(summaryCellCol);
+                var curCell = nxtCol.concat(summaryCellRow);
+                while (!ws[curCell] == false) {
+                  lObjTitles.push(ws[curCell].v);
+                  nxtCol = nextColVal(nxtCol);
+                  curCell = nxtCol.concat(summaryCellRow);
                 }
-                else if (queueCell.length == 4) {
-                  var s1 = queueCell[1];
-                  var s2 = queueCell[2];
-                  var s3 = queueCell[3];
-                  var st = s1.concat(s2);
-                  cellRow = st.concat(s3);
-                  cellCol = queueCell[0];
+              }
+
+              createlObjArr(cellRow, cellCol);
+              learnObjTitleArr = lObjTitles;
+
+              function fillLe(qRow, qCol, le, x) {
+                var nxtCol = nextColVal(qCol);
+                var nxtRow = Number(qRow) + x;
+                var nxtRowStr = String(nxtRow);
+                var curCell = nxtCol.concat(nxtRowStr);
+                while (!ws[curCell] == false) {
+                  le.push(ws[curCell].v);
+                  nxtCol = nextColVal(nxtCol);
+                  curCell = nxtCol.concat(nxtRowStr);
                 }
+              }
 
-                console.log(cellRow);
-                console.log(cellCol);
+              var tempLe1 = [];
+              var tempLe2 = [];
+              var tempLe3 = [];
+              var tempLe4 = [];
 
-                function nextColVal(curCol) { //this takes in a str of a col and returns VALUE of next item
-                  var cnt = 0;
-                  var nxtCol;
-                  var i;
-                  for (i = 0; i < albet.length; i++) {
-                    if (albet[i] == curCol) {
-                      cnt++;
-                      nxtCol = albet[cnt];
-                      break;
-                    } else {
-                      cnt++;
-                    }
-                  }
-                  return nxtCol;
-                }
+              fillLe(cellRow, cellCol, tempLe1, 1);
+              fillLe(cellRow, cellCol, tempLe2, 2);
+              fillLe(cellRow, cellCol, tempLe3, 3);
+              fillLe(cellRow, cellCol, tempLe4, 4);
 
-                function createlObjArr(summaryCellRow, summaryCellCol) { //creates an array of the learning objectives for this class
-                  var nxtCol = nextColVal(summaryCellCol);
-                  var curCell = nxtCol.concat(summaryCellRow);
-                  while (!ws[curCell] == false) {
-                    lObjTitles.push(ws[curCell].v);
-                    nxtCol = nextColVal(nxtCol);
-                    curCell = nxtCol.concat(summaryCellRow);
-                  }
-                }
+              le1 = tempLe1;
+              le2 = tempLe2;
+              le3 = tempLe3;
+              le4 = tempLe4;
 
-                createlObjArr(cellRow, cellCol);
-                learnObjTitleArr = lObjTitles;
+              createGraph(div, sheetName);
 
-                console.log(lObjTitles);
+              le1 = [];
+              le2 = [];
+              le3 = [];
+              le4 = [];
+          }
 
-                function fillLe(qRow, qCol, le, x) {
-                  var nxtCol = nextColVal(qCol);
-                  var nxtRow = Number(qRow) + x;
-                  var nxtRowStr = String(nxtRow);
-                  var curCell = nxtCol.concat(nxtRowStr);
-                  while (!ws[curCell] == false) {
-                    le.push(ws[curCell].v);
-                    nxtCol = nextColVal(nxtCol);
-                    curCell = nxtCol.concat(nxtRowStr);
-                  }
-                }
-
-                fillLe(cellRow, cellCol, le1, 1);
-                fillLe(cellRow, cellCol, le2, 2);
-                fillLe(cellRow, cellCol, le3, 3);
-                fillLe(cellRow, cellCol, le4, 4);
-        }
-});
-
-    function createGraph() {
-      var xArr = [];
-      var i;
-      for (i = 0; i < learnObjTitleArr.length; i++) {
-        xArr.push(learnObjTitleArr[i]);
-      }
-
-      var trace1 = {
-        x: xArr,
-        y: le1,
-        name: '>= 4',
-        type: 'bar'
-      };
-
-      var trace2 = {
-        x: xArr,
-        y: le2,
-        name: '>= 3',
-        type: 'bar'
-      };
-
-      var trace3 = {
-        x: xArr,
-        y: le3,
-        name: '>= 2',
-        type: 'bar'
-      };
-
-      var trace4 = {
-        x: xArr,
-        y: le4,
-        name: '>= 1',
-        type: 'bar'
-      };
-
-      var data = [trace1, trace2, trace3, trace4];
-
-      var layout = {
-        title: 'Distribution of Scores for CS301.3 Performance <br> Indicators in Spring 2018 (n=63)',
-        font:{ family: 'Raleway, sans-serif' },
-        barmode: 'stack'
-      };
-
-      Plotly.newPlot('myDiv', data, layout);
-      console.log(learnObjTitleArr);
+          for (var k = 0; k < (sheets.length - 3); k++) {
+            multiSheet(wsArr[k], divArr[k], String(sheets[k]));
+          }
 
     }
+  });
+}
+
+createWorkBook(excel_file, 0);
 
     </script>
   </body>
