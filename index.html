@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Team Excelsior</title>
+    <link rel="stylesheet" href="css/bulma.css">
+    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+    <script src="Dependencies/jquery-3.4.1.min.js" ></script>
+    <script src="Dependencies/xlsx.full.min.js"></script>
+    <script src="Dependencies/plotly-latest.min.js"></script>
+    <script>if (window.module) module = window.module;</script>
+
+    <!-- OR use a specific plotly.js release (e.g. version 1.5.0) -->
+    <script src="https://kit.fontawesome.com/24bd548384.js" crossorigin="anonymous"></script>
+    <style>
+            .collapsible {
+              background-color: #777;
+              color: white;
+              cursor: pointer;
+              padding: 18px;
+              width: 100%;
+              border: none;
+              text-align: left;
+              outline: none;
+              font-size: 15px;
+            }
+
+            .active, .collapsible:hover {
+              background-color: #555;
+            }
+
+            .collapsible:after {
+              content: '\002B';
+              color: white;
+              font-weight: bold;
+              float: right;
+              margin-left: 5px;
+            }
+
+            .active:after {
+              content: "\2212";
+            }
+
+            .content {
+              padding: 0 18px;
+              max-height: 0;
+              overflow: hidden;
+              transition: max-height 0.2s ease-out;
+              background-color: #f1f1f1;
+            }
+            </style>
+  </head>
+  <body>
+  <section class="section level has-background-white">
+    <div class=level-left>
+        <img src="img/logo.png" class="level-item" style="width:auto; height:auto; max-width:150px; max-height:60px; padding-right: 20px">
+    </div>
+    <div class="container">
+      <h1 class="title">
+        AMTV - ABET Monitoring Tool & Visualization
+      </h1>
+      <p class="subtitle">
+        Created by Team Excelsior
+      </p>
+    </div>
+    <div class="level-right">
+        <img src="img/build.png" style="padding-right: 5px">
+        <p class="level-item">Config</p>
+    </div>
+  </section>
+  <section class="section has-background-link">
+    <div class="columns">
+        <div class="column">
+            <div class="box is-half has-background-light">
+                <button class="button"><img src="img/add.png" style="padding-right: 5px">Add Learning Outcome</button><br><br>
+                <div id="navbar"><span>Select ABET data file</span></div>
+                <button onclick="consoleTest()">Test Object Array</button>
+                <div id="wrapper">
+                  <input type="file" id="input-excel">Choose a Excel file</input>
+                </div>
+                <br>
+                <!-- <button onclick="createGraph('myDiv1')">Generate Plotly Graph</button> -->
+            </div>
+        <!--</div>
+        <div class="column">-->
+            <div class="box is-half has-background-light">
+                <button type="button" class="collapsible">Learning Outcome 1</button>
+                <div class="content">
+                    <p style="padding-top: 10px">
+                        Sample text to briefly explain this learning outcome.
+                    </p>
+                    <div class="table is-narrow is-hoverable is-fullwidth">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Course #</th>
+                                    <th>Data Collected</th>
+                                    <th>Performance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><a href="">Spring543</a></td>
+                                    <td>
+                                        <span class="icon has-text-success">
+                                            <i class="fas fa-check-square"></i>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="icon has-text-success">
+                                            <i class="fas fa-check-square"></i>
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><a href="">Spring410</a></td>
+                                    <td>
+                                        <span class="icon has-text-warning">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="icon has-text-danger">
+                                            <i class="fas fa-ban"></i>
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><a href="">Spring685</a></td>
+                                    <td>
+                                        <span class="icon has-text-success">
+                                            <i class="fas fa-check-square"></i>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="icon has-text-danger">
+                                            <i class="fas fa-ban"></i>
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <button type="button" class="collapsible">Learning Outcome 2</button>
+                <div class="content">
+                    <p style="padding-top: 10px">
+                        Sample text to briefly explain this learning outcome.
+                    </p>
+                        <div class="table is-narrow is-hoverable is-fullwidth">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Course #</th>
+                                            <th>Data Collected</th>
+                                            <th>Performance</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><a href="">Spring543</a></td>
+                                            <td>
+                                                <span class="icon has-text-success">
+                                                    <i class="fas fa-check-square"></i>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="icon has-text-success">
+                                                    <i class="fas fa-check-square"></i>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><a href="">Spring410</a></td>
+                                            <td>
+                                                <span class="icon has-text-warning">
+                                                    <i class="fas fa-exclamation-triangle"></i>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="icon has-text-danger">
+                                                    <i class="fas fa-ban"></i>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><a href="">Spring685</a></td>
+                                            <td>
+                                                <span class="icon has-text-success">
+                                                    <i class="fas fa-check-square"></i>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="icon has-text-danger">
+                                                    <i class="fas fa-ban"></i>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                </div>
+                <button type="button" class="collapsible">Learning Outcome 3</button>
+                <div class="content">
+                        <p style="padding-top: 10px">
+                            Sample text to briefly explain this learning outcome.
+                        </p>
+                        <div class="table is-narrow is-hoverable is-fullwidth">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Course #</th>
+                                            <th>Data Collected</th>
+                                            <th>Performance</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><a href="">Spring543</a></td>
+                                            <td>
+                                                <span class="icon has-text-success">
+                                                    <i class="fas fa-check-square"></i>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="icon has-text-success">
+                                                    <i class="fas fa-check-square"></i>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><a href="">Spring410</a></td>
+                                            <td>
+                                                <span class="icon has-text-warning">
+                                                    <i class="fas fa-exclamation-triangle"></i>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="icon has-text-danger">
+                                                    <i class="fas fa-ban"></i>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><a href="">Spring685</a></td>
+                                            <td>
+                                                <span class="icon has-text-success">
+                                                    <i class="fas fa-check-square"></i>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="icon has-text-danger">
+                                                    <i class="fas fa-ban"></i>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                </div>
+            </div>
+        </div>
+        <div class="column">
+            <div class="box is-half has-background-light">
+                Placeholder for future course viewer feature.
+            </div>
+            <div id='myDiv1' style="width:600px;height:500px;">
+        </div>
+            <div id='myDiv2' style="width:600px;height:500px;">
+        </div>
+            <div id='myDiv3' style="width:600px;height:500px;">
+        </div>
+            <div id='myDiv4' style="width:600px;height:500px;">
+        </div>
+            <div id='myDiv5' style="width:600px;height:500px;">
+        </div>
+            <div id='myDiv6' style="width:600px;height:500px;">
+        </div>
+            <div id='myDiv7' style="width:600px;height:500px;">
+        </div>
+            <div id='myDiv8' style="width:600px;height:500px;">
+        </div>
+    </div>
+  </section>
+    <input type="hidden" id="dataArray" name="dataArray">
+  <script>
+  const LocalStorage = require('node-localstorage').LocalStorage;
+  let localStorage = new LocalStorage('./config');
+  var fileTest = localStorage.getItem('testfile');
+  var fileData;
+  if(fileTest){
+    fileData = JSON.parse(fileTest);
+    console.log(fileData);
+  }
+var coll = document.getElementsByClassName("collapsible");
+var i;
+var excel_file = $('#input-excel');
+
+    for (i = 0; i < coll.length; i++) {
+        coll[i].addEventListener("click", function() {
+        this.classList.toggle("active");
+        var content = this.nextElementSibling;
+        if (content.style.maxHeight){
+            content.style.maxHeight = null;
+        } else {
+            content.style.maxHeight = content.scrollHeight + "px";
+        }
+      });
+    }
+
+var le1;
+var le2;
+var le3;
+var le4;
+
+var albet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
+ 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+
+var learnObjTitleArr;
+
+// class LearningOutcome {
+//   constructor(){
+//   }
+// }
+
+var offeringArray = [];
+
+// function exportArraytoLogFile() {}
+
+class CourseOffering {
+  constructor(courseName, lObjs, sem, at1, at2, at3, at4m) {
+    this.course = courseName; //self explanatory
+    this.lObjList = lObjs; //array of learning objectives for this offering
+    this.semester = sem; //the semester this is offered
+    this.studLev1 =at1; //array of # of students with score 1
+    this.studLev2 =at2; //array of # of students with score 2
+    this.studLev3 =at3; //array of # of students with score 3
+    this.studLev4m =at4m; //array of # of students with score 4 or 5
+  }
+}
+
+function createWorkBook(excelSheet, sheetNum) {
+  excelSheet.change(function(e){
+          var reader = new FileReader();
+          reader.readAsArrayBuffer(e.target.files[0]);
+          reader.onload = function(e) {
+            var queueText = "Summary";
+            var queueCell;
+            var cellRow;
+            var cellCol;
+            var lObjTitles = [];
+
+            var data = new Uint8Array(reader.result);
+            var wb = XLSX.read(data,{type:'array'});
+
+            var sheets = wb.SheetNames;
+            var sheetsArr = [];
+            var wsArr = [];
+            // var divArr = ['myDiv1', 'myDiv2', 'myDiv3', 'myDiv4', 'myDiv5', 'myDiv6', 'myDiv7', 'myDiv8'] // not sure if i need this
+            for (var i = 2; i < (sheets.length - 3); i++) {
+              sheetsArr.push(sheets[sheetNum + i]);
+            }
+            sheetsArr.push(sheets[sheetNum]);
+            sheetsArr.push(sheets[sheetNum + 1]);
+
+            for (var j = 2; j < (sheets.length - 3); j++) {
+              wsArr.push(wb.Sheets[sheetsArr[j]]);
+            }
+            wsArr.push(wb.Sheets[sheetsArr[0]]);
+            wsArr.push(wb.Sheets[sheetsArr[1]]);
+
+
+            function multiSheet(ws, sheetName) { //creates 1 CourseOffering object per offering of the class
+              lObjTitles = [];
+              var range = XLSX.utils.decode_range(ws['!ref']); // get the range
+              for(var R = range.s.r; R <= range.e.r; ++R) {
+                for(var C = range.s.c; C <= range.e.c; ++C) {
+                  /* find the cell object */
+                  var cellref = XLSX.utils.encode_cell({c:C, r:R}); // construct A1 reference for cell
+                  if(!ws[cellref]) continue; // if cell doesn't exist, move on
+                  var cell = ws[cellref];
+
+                  /* if the cell is a text cell with the correct value (summary) then set the queue cell to that cell */
+                  if(!(cell.t == 's' || cell.t == 'str')) continue; // skip if cell is not text
+                  if(cell.v === queueText) queueCell = cellref; // we are now setting the queue Cell (Summary) so that we can find all the other desired cells
+                }
+              }
+
+              if (queueCell.length == 3) { //checks queue cell length and creates 2 variables for queueCell row and column
+                var s1 = queueCell[1];
+                var s2 = queueCell[2];
+                cellRow = s1.concat(s2);
+                cellCol = queueCell[0];
+              } else if(queueCell.length == 2) {
+                cellRow = queueCell[1];
+                cellCol = queueCell[0];
+              }
+              else if (queueCell.length == 4) {
+                var s1 = queueCell[1];
+                var s2 = queueCell[2];
+                var s3 = queueCell[3];
+                var st = s1.concat(s2);
+                cellRow = st.concat(s3);
+                cellCol = queueCell[0];
+              }
+
+
+              function nextColVal(curCol) { //this takes in a str of a col and returns VALUE of next item
+                var cnt = 0;
+                var nxtCol;
+                var i;
+                for (i = 0; i < albet.length; i++) {
+                  if (albet[i] == curCol) {
+                    cnt++;
+                    nxtCol = albet[cnt];
+                    break;
+                  } else {
+                    cnt++;
+                  }
+                }
+                return nxtCol;
+              }
+
+      function createlObjArr(summaryCellRow, summaryCellCol) { //creates an array of the learning objectives for this class
+        var nxtCol = nextColVal(summaryCellCol);
+        var curCell = nxtCol.concat(summaryCellRow);
+        while (!ws[curCell] == false) {
+          lObjTitles.push(ws[curCell].v);
+          nxtCol = nextColVal(nxtCol);
+          curCell = nxtCol.concat(summaryCellRow);
+        }
+      }
+
+      createlObjArr(cellRow, cellCol);
+      learnObjTitleArr = lObjTitles;
+
+      function fillLe(qRow, qCol, le, x) { //this takes in the queue row and column and fills in an array with the values for this learning objective column
+        var nxtCol = nextColVal(qCol);
+        var nxtRow = Number(qRow) + x;
+        var nxtRowStr = String(nxtRow);
+        var curCell = nxtCol.concat(nxtRowStr);
+        while (!ws[curCell] == false) {
+          le.push(ws[curCell].v);
+          nxtCol = nextColVal(nxtCol);
+          curCell = nxtCol.concat(nxtRowStr);
+        }
+      }
+
+      var tempLe1 = [];
+      var tempLe2 = [];
+      var tempLe3 = [];
+      var tempLe4 = [];
+
+      fillLe(cellRow, cellCol, tempLe1, 1);
+      fillLe(cellRow, cellCol, tempLe2, 2);
+      fillLe(cellRow, cellCol, tempLe3, 3);
+      fillLe(cellRow, cellCol, tempLe4, 4);
+
+      var wle1 = [];
+      var wle2 = [];
+      var wle3 = [];
+      var wle4 = [];
+      var wleArr = [wle1, wle2, wle3, wle4];
+      var tempSum;
+
+      for (var i = 0; i < tempLe1.length; i++) {
+        var temp1 = tempLe1[i];
+        var temp2 = tempLe2[i];
+        var temp3 = tempLe3[i];
+        var temp4 = tempLe4[i];
+        tempSum = temp1 + temp2 + temp3 + temp4;
+        wle1.push((tempLe1[i]/tempSum) * 100);
+        wle2.push((tempLe2[i]/tempSum) * 100);
+        wle3.push((tempLe3[i]/tempSum) * 100);
+        wle4.push((tempLe4[i]/tempSum) * 100);
+      }
+
+      var leArray = [wle1, wle2, wle3, wle4];
+
+      return leArray;
+  }
+
+  for (var k = 0; k < (sheets.length - 3); k++) { //this is the for loop that creates all the objects and throws them into an Array
+    var data = multiSheet(wsArr[k], String(sheets[k]));
+    offeringArray.push(new CourseOffering(learnObjTitleArr[0].substr(0, 5), learnObjTitleArr, String(sheets[k]), data[0], data[1], data[2], data[3]));
+      }
+    }
+  });
+}
+
+// function createGraph(div, sheetName) {
+//   var wle1 = [];
+//   var wle2 = [];
+//   var wle3 = [];
+//   var wle4 = [];
+//   var wleArr = [wle1, wle2, wle3, wle4];
+//   var tempSum;
+//
+//     // console.log(le1);
+//
+//   for (var i = 0; i < le1.length; i++) {
+//     var temp1 = le1[i];
+//     var temp2 = le2[i];
+//     var temp3 = le3[i];
+//     var temp4 = le4[i];
+//     tempSum = temp1 + temp2 + temp3 + temp4;
+//     wle1.push((le1[i]/tempSum) * 100);
+//     wle2.push((le2[i]/tempSum) * 100);
+//     wle3.push((le3[i]/tempSum) * 100);
+//     wle4.push((le4[i]/tempSum) * 100);
+//   }
+//
+//   var xArr = [];
+//   var i;
+//   for (i = 0; i < learnObjTitleArr.length; i++) {
+//     xArr.push(learnObjTitleArr[i]);
+//   }
+//
+//   var trace1 = {
+//     x: xArr,
+//     y: wle1,
+//     name: '>= 4',
+//     type: 'bar',
+//     marker: {
+//       color: 'rgb(64,64,64)'
+//     }
+//   };
+//
+//   var trace2 = {
+//     x: xArr,
+//     y: wle2,
+//     name: '>= 3',
+//     type: 'bar',
+//     marker: {
+//       color: 'rgb(186,186,186)'
+//     }
+//   };
+//
+//   var trace3 = {
+//     x: xArr,
+//     y: wle3,
+//     name: '>= 2',
+//     type: 'bar',
+//     marker: {
+//       color: 'rgb(244,165,130)'
+//     }
+//   };
+//
+//   var trace4 = {
+//     x: xArr,
+//     y: wle4,
+//     name: '>= 1',
+//     type: 'bar',
+//     marker: {
+//       color: 'rgb(202,0,32)'
+//     }
+//   };
+//
+//   var data = [trace1, trace2, trace3, trace4];
+//
+//   var layout = {
+//     title: 'Distribution of Scores for '.concat(sheetName),
+//     font:{ family: 'Raleway, sans-serif' },
+//     barmode: 'stack'
+//   };
+//
+//     Plotly.newPlot(div, data, layout);
+//
+//   }
+
+
+// challenges standing in my way
+// being able to grab multiple excel files and not relying on .change
+// just creating the line chart comparing data from different semesters
+// being able to load different sets of data without refreshing the page
+// editing the title so its not Data 1137 or whatever and actually like Spring 2019 or whatever
+
+createWorkBook(excel_file, 0);
+
+function consoleTest(){
+  console.log(offeringArray);
+  var foo = document.getElementById('dataArray');
+  foo.value = JSON.stringify(offeringArray);
+  //$('#input_hidden_field').val(JSON.stringify(offeringArray));
+  //console.log(offeringArray);
+//  var foo = document.getElementById('dataArray').value;
+  console.log(foo);
+}
+
+
+    </script>
+  </body>
+</html>
