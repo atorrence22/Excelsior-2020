@@ -76,6 +76,7 @@
                 <button class="button"><img src="img/add.png" style="padding-right: 5px">Add Learning Outcome</button><br><br>
                 <div id="navbar"><span>Select ABET data file</span></div>
                 <button onclick="consoleTest()">Test Object Array</button>
+                <button onclick="doGraph()">Creates Sample Graph</button>
                 <div id="wrapper">
                   <input type="file" id="input-excel">Choose a Excel file</input>
                 </div>
@@ -261,9 +262,33 @@
                 </div>
             </div>
         </div>
+
         <div class="column">
             <div class="box is-half has-background-light">
-                Placeholder for future course viewer feature.
+                <!-- Matt's code -->
+                <p>Add a learning outcome!</p>
+                    <form>
+                        <div class="formBox">
+                            <label for="number">LO Number/Letter</label>
+                            <input type="text" id="loNumber"/>
+                        </div>
+                        <div class="formBox">
+                            <label for="desc">Description</label>
+                            <input type="text" id="loDescription"/>
+                        </div>
+                		<div class="formBox">
+                            <label for="course">Courses (seperated by ',' WITHOUT a space)</label>
+                            <input type="text" id="loCourses"/>
+                        </div>
+                        <div class="formBox">
+                            <button id="btn">Click to Add</button>
+                        </div>
+                        <!--this div is for display-->
+                		<div id="msg">
+                            <pre></pre>
+                        </div>
+                    </form>
+                <!-- Matt's code -->
             </div>
             <div id='myDiv1' style="width:600px;height:500px;">
         </div>
@@ -281,9 +306,24 @@
         </div>
             <div id='myDiv8' style="width:600px;height:500px;">
         </div>
+            <div id='myDiv9' style="width:600px;height:500px;">
+        </div>
+            <div id='myDiv10' style="width:600px;height:500px;">
+        </div>
+            <div id='myDiv11' style="width:600px;height:500px;">
+        </div>
     </div>
   </section>
-  <script>
+  <!-- <input type="hidden" id="dataArray" name="dataArray"> -->
+<script>
+// const LocalStorage = require('node-localstorage').LocalStorage;
+// let localStorage = new LocalStorage('./config');
+// var fileTest = localStorage.getItem('data_file');
+// var fileData;
+// if(fileTest){
+//   fileData = JSON.parse(fileTest);
+//   console.log(fileData);
+// }
 var coll = document.getElementsByClassName("collapsible");
 var i;
 var excel_file = $('#input-excel');
@@ -305,29 +345,21 @@ var le2;
 var le3;
 var le4;
 
-var albet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
- 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
-
 var learnObjTitleArr;
 
-// class LearningOutcome {
-//   constructor(){
-//   }
-// }
-
-var offeringArray = [];
-
-// function exportArraytoLogFile() {}
+var offeringArray = []; //this is the array that holds every offering of each class imported
 
 class CourseOffering {
-  constructor(courseName, lObjs, sem, at1, at2, at3, at4m) {
+  constructor(courseName, lObjs, sem, at1, at2, at3, at4m, perPass, compl) {
     this.course = courseName; //self explanatory
     this.lObjList = lObjs; //array of learning objectives for this offering
     this.semester = sem; //the semester this is offered
-    this.studLev1 =at1; //array of # of students with score 1
-    this.studLev2 =at2; //array of # of students with score 2
-    this.studLev3 =at3; //array of # of students with score 3
-    this.studLev4m =at4m; //array of # of students with score 4 or 5
+    this.studLev1 = at1; //array of # of students with score 1
+    this.studLev2 = at2; //array of # of students with score 2
+    this.studLev3 = at3; //array of # of students with score 3
+    this.studLev4m = at4m; //array of # of students with score 4 or 5
+    this.percentPassing = perPass; //array of %'s of students who passed
+    this.complete = compl; //this is if the data is complete or not
   }
 }
 
@@ -348,18 +380,13 @@ function createWorkBook(excelSheet, sheetNum) {
             var sheets = wb.SheetNames;
             var sheetsArr = [];
             var wsArr = [];
-            // var divArr = ['myDiv1', 'myDiv2', 'myDiv3', 'myDiv4', 'myDiv5', 'myDiv6', 'myDiv7', 'myDiv8'] // not sure if i need this
-            for (var i = 2; i < (sheets.length - 3); i++) {
+            for (var i = 0; i < (sheets.length - 3); i++) {
               sheetsArr.push(sheets[sheetNum + i]);
             }
-            sheetsArr.push(sheets[sheetNum]);
-            sheetsArr.push(sheets[sheetNum + 1]);
 
-            for (var j = 2; j < (sheets.length - 3); j++) {
+            for (var j = 0; j < (sheets.length - 3); j++) {
               wsArr.push(wb.Sheets[sheetsArr[j]]);
             }
-            wsArr.push(wb.Sheets[sheetsArr[0]]);
-            wsArr.push(wb.Sheets[sheetsArr[1]]);
 
 
             function multiSheet(ws, sheetName) { //creates 1 CourseOffering object per offering of the class
@@ -398,6 +425,8 @@ function createWorkBook(excelSheet, sheetNum) {
 
 
               function nextColVal(curCol) { //this takes in a str of a col and returns VALUE of next item
+                var albet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
+                 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
                 var cnt = 0;
                 var nxtCol;
                 var i;
@@ -442,11 +471,13 @@ function createWorkBook(excelSheet, sheetNum) {
       var tempLe2 = [];
       var tempLe3 = [];
       var tempLe4 = [];
+      var perPassArr = [];
 
       fillLe(cellRow, cellCol, tempLe1, 1);
       fillLe(cellRow, cellCol, tempLe2, 2);
       fillLe(cellRow, cellCol, tempLe3, 3);
       fillLe(cellRow, cellCol, tempLe4, 4);
+      fillLe(cellRow, cellCol, perPassArr, 5);
 
       var wle1 = [];
       var wle2 = [];
@@ -469,109 +500,185 @@ function createWorkBook(excelSheet, sheetNum) {
 
       var leArray = [wle1, wle2, wle3, wle4];
 
-      return leArray;
+      return [leArray, perPassArr];
   }
 
   for (var k = 0; k < (sheets.length - 3); k++) { //this is the for loop that creates all the objects and throws them into an Array
     var data = multiSheet(wsArr[k], String(sheets[k]));
-    offeringArray.push(new CourseOffering(learnObjTitleArr[0].substr(0, 5), learnObjTitleArr, String(sheets[k]), data[0], data[1], data[2], data[3]));
+    offeringArray.push(new CourseOffering(learnObjTitleArr[0].substr(0, 5), learnObjTitleArr, String(sheets[k]), data[0][0], data[0][1], data[0][2], data[0][3], data[1]));
       }
     }
   });
 }
 
-// function createGraph(div, sheetName) {
-//   var wle1 = [];
-//   var wle2 = [];
-//   var wle3 = [];
-//   var wle4 = [];
-//   var wleArr = [wle1, wle2, wle3, wle4];
-//   var tempSum;
-//
-//     // console.log(le1);
-//
-//   for (var i = 0; i < le1.length; i++) {
-//     var temp1 = le1[i];
-//     var temp2 = le2[i];
-//     var temp3 = le3[i];
-//     var temp4 = le4[i];
-//     tempSum = temp1 + temp2 + temp3 + temp4;
-//     wle1.push((le1[i]/tempSum) * 100);
-//     wle2.push((le2[i]/tempSum) * 100);
-//     wle3.push((le3[i]/tempSum) * 100);
-//     wle4.push((le4[i]/tempSum) * 100);
-//   }
-//
-//   var xArr = [];
-//   var i;
-//   for (i = 0; i < learnObjTitleArr.length; i++) {
-//     xArr.push(learnObjTitleArr[i]);
-//   }
-//
-//   var trace1 = {
-//     x: xArr,
-//     y: wle1,
-//     name: '>= 4',
-//     type: 'bar',
-//     marker: {
-//       color: 'rgb(64,64,64)'
-//     }
-//   };
-//
-//   var trace2 = {
-//     x: xArr,
-//     y: wle2,
-//     name: '>= 3',
-//     type: 'bar',
-//     marker: {
-//       color: 'rgb(186,186,186)'
-//     }
-//   };
-//
-//   var trace3 = {
-//     x: xArr,
-//     y: wle3,
-//     name: '>= 2',
-//     type: 'bar',
-//     marker: {
-//       color: 'rgb(244,165,130)'
-//     }
-//   };
-//
-//   var trace4 = {
-//     x: xArr,
-//     y: wle4,
-//     name: '>= 1',
-//     type: 'bar',
-//     marker: {
-//       color: 'rgb(202,0,32)'
-//     }
-//   };
-//
-//   var data = [trace1, trace2, trace3, trace4];
-//
-//   var layout = {
-//     title: 'Distribution of Scores for '.concat(sheetName),
-//     font:{ family: 'Raleway, sans-serif' },
-//     barmode: 'stack'
-//   };
-//
-//     Plotly.newPlot(div, data, layout);
-//
-//   }
-
-
-// challenges standing in my way
-// being able to grab multiple excel files and not relying on .change
-// just creating the line chart comparing data from different semesters
-// being able to load different sets of data without refreshing the page
-// editing the title so its not Data 1137 or whatever and actually like Spring 2019 or whatever
-
 createWorkBook(excel_file, 0);
 
-function consoleTest(){
-  console.log(offeringArray);
+var divArr = ['myDiv1', 'myDiv2', 'myDiv3', 'myDiv4', 'myDiv5', 'myDiv6', 'myDiv7', 'myDiv8', 'myDiv9', 'myDiv10', 'myDiv11'];
+
+function doGraph() {
+  graphLOutcome(learningOutcomes[0]);
 }
+
+function graphLOutcome(learnOutObject) {
+  var list = [];
+  var finalList = [];
+  var courses = learnOutObject.courses.split(",");
+  for (var i = 0; i < offeringArray.length; i++){
+    for (var j = 0; j < courses.length; j++){
+      if (offeringArray[i].course == courses[j]) {
+        for (var h = 0; h < offeringArray[i].lObjList.length; h++){
+          if (offeringArray[i].lObjList[h][6] == learnOutObject.number) {
+            list.push(offeringArray[i]);
+            break;
+          }
+        }
+      } else {
+        continue;
+      }
+    }
+  }
+  console.log(list);
+
+  for (var k = 0; k < list.length; k++) {
+    var tempArr = [list[k]];
+    for (var l = 0; l < list.length; l++) {
+      if ((l != k) && (list[k].semester == list[l].semester)) {
+        tempArr.push(list[l]);
+        list.splice(l);
+      }
+    }
+    finalList.push(tempArr);
+  }
+
+  for (var m = 0; m < finalList.length; m++) {
+    console.log(finalList[m]);
+    createGraph(finalList[m], learnOutObject.number, divArr[m]);
+  }
+
+}
+
+function createGraph(courseOfferingList, learnOutcome, div) {
+  var coursesArr = courseOfferingList;
+  var xArr = [];
+  var yArr = [];
+  var t1Arr = [];
+  var t2Arr = [];
+  var t3Arr = [];
+  var t4Arr = [];
+
+  for (var p = 0; p < coursesArr.length; p++){
+    var i;
+    for (i = 0; i < coursesArr[p].lObjList.length; i++) {
+      if (coursesArr[p].lObjList[i][6] == learnOutcome) {
+          xArr.push(coursesArr[p].lObjList[i]);
+          yArr.push(i);
+      } else {
+        continue;
+      }
+    }
+    for (var j = 0; j < yArr.length; j++) {
+      t1Arr.push(coursesArr[p].studLev1[yArr[j]]);
+      t2Arr.push(coursesArr[p].studLev2[yArr[j]]);
+      t3Arr.push(coursesArr[p].studLev3[yArr[j]]);
+      t4Arr.push(coursesArr[p].studLev4m[yArr[j]]);
+    }
+  }
+
+  var trace1 = {
+    x: xArr,
+    y: t1Arr,
+    name: '>= 4',
+    type: 'bar',
+    marker: {
+      color: 'rgb(64,64,64)'
+    }
+  };
+
+  var trace2 = {
+    x: xArr,
+    y: t2Arr,
+    name: '>= 3',
+    type: 'bar',
+    marker: {
+      color: 'rgb(186,186,186)'
+    }
+  };
+
+  var trace3 = {
+    x: xArr,
+    y: t3Arr,
+    name: '>= 2',
+    type: 'bar',
+    marker: {
+      color: 'rgb(244,165,130)'
+    }
+  };
+
+  var trace4 = {
+    x: xArr,
+    y: t4Arr,
+    name: '>= 1',
+    type: 'bar',
+    marker: {
+      color: 'rgb(202,0,32)'
+    }
+  };
+
+  var data = [trace1, trace2, trace3, trace4];
+
+  var layout = {
+    title: 'Distribution of Scores for '.concat(coursesArr[0].semester),
+    font:{ family: 'Raleway, sans-serif' },
+    barmode: 'stack'
+  };
+
+    Plotly.newPlot(div, data, layout);
+
+  }
+
+
+function consoleTest(){ //actually has functionality
+  console.log(offeringArray);
+  // if(fileTest){
+  //   var foo = document.getElementById('dataArray');
+  //   foo.value = JSON.stringify(fileData.concat(offeringArray));
+  // }
+  // else {
+  //   var foo = document.getElementById('dataArray');
+  //   foo.value = JSON.stringify(offeringArray);
+  // }
+  // console.log(foo);
+  console.log(learningOutcomes);
+}
+
+let learningOutcomes = [];
+        // example
+        const addLO = (ev)=>{
+            ev.preventDefault();  //to stop the form submitting
+            let learningOutcome = {
+                number: document.getElementById('loNumber').value,
+                description: document.getElementById('loDescription').value,
+				courses: document.getElementById('loCourses').value
+            }
+            learningOutcomes.push(learningOutcome);
+            document.forms[0].reset(); // to clear the form for the next entries
+
+			//testing file output
+			var loString = JSON.stringify(learningOutcomes);
+			var fs = require('fs');
+			try { fs.writeFileSync('myfile.txt', content, 'utf-8'); }
+			catch(e) { alert('Failed to save the file !'); }
+            //for display purposes only
+            console.warn('added' , {learningOutcomes} );
+            let pre = document.querySelector('#msg pre');
+            pre.textContent = '\n' + JSON.stringify(learningOutcomes, '\t', 2);
+
+            //saving to localStorage
+            localStorage.setItem('MyLearningOutcomes', JSON.stringify(learningOutcomes) );
+        }
+        document.addEventListener('DOMContentLoaded', ()=>{
+            document.getElementById('btn').addEventListener('click', addLO);
+        });
 
 
     </script>
