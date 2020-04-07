@@ -75,10 +75,9 @@
             <div class="box is-half has-background-light">
                 <button class="button"><img src="img/add.png" style="padding-right: 5px">Add Learning Outcome</button><br><br>
                 <div id="navbar"><span>Select ABET data file</span></div>
-                <button onclick="consoleTest()">Test Object Array</button>
-                <button onclick="doGraph()">Creates Sample Graph</button>
+                <button onclick="consoleTest()">Console Test</button>
                 <div id="wrapper">
-                  <input type="file" id="input-excel">Choose a Excel file</input>
+                  <input type="file" id="input-excel">Please individually load each excel file</input>
                 </div>
                 <br>
                 <!-- <button onclick="createGraph('myDiv1')">Generate Plotly Graph</button> -->
@@ -88,9 +87,11 @@
             <div class="box is-half has-background-light">
                 <button type="button" class="collapsible">Learning Outcome 1</button>
                 <div class="content">
-                    <p style="padding-top: 10px">
-                        Sample text to briefly explain this learning outcome.
-                    </p>
+                  <input type="text" id="LOinput">Enter Learning Object Number/Letter</input>
+                  <input type="submit" value="Track Learning Outcome" onclick="learnOutcomeTrack()"></input>
+                    <div id="trackLO" style="padding-top: 10px">
+
+                    </div>
                     <div class="table is-narrow is-hoverable is-fullwidth">
                         <table class="table">
                             <thead>
@@ -288,6 +289,9 @@
                             <pre></pre>
                         </div>
                     </form>
+                    <!-- <button onclick="doGraph()">Create Graphs From Learning Objective</button> -->
+                    <input type="text" id="graphLOinput">Enter Learning Object Number/Letter</input>
+                    <input type="submit" value="Graph" onclick="doGraph()"></input>
                 <!-- Matt's code -->
             </div>
             <div id='myDiv1' style="width:600px;height:500px;">
@@ -361,6 +365,54 @@ class CourseOffering {
     this.percentPassing = perPass; //array of %'s of students who passed
     this.complete = compl; //this is if the data is complete or not
   }
+}
+
+function learnOutcomeTrack() {
+  var lO;
+  var userInput = document.getElementById("LOinput").value;
+  for (var i = 0; i < learningOutcomes.length; i++) {
+    if (userInput == learningOutcomes[i].number) {
+      lO = learningOutcomes[i];
+      break;
+    } else {
+      continue;
+    }
+  }
+  var list = [];
+  var outputStr = "";
+  var courses = lO.courses.split(",");
+  for (var i = 0; i < offeringArray.length; i++){
+    for (var j = 0; j < courses.length; j++){
+      if (offeringArray[i].course == courses[j]) {
+        for (var h = 0; h < offeringArray[i].lObjList.length; h++){
+          if (offeringArray[i].lObjList[h][6] == lO.number) {
+            list.push(offeringArray[i]);
+            break;
+          }
+        }
+      } else {
+        continue;
+      }
+    }
+  }
+  for (var i = 0; i < list.length; i++) {
+    var passed;
+    var tempTotal = 0;
+    var totalData = 0;
+    for (var k = 0; k < list[i].percentPassing.length; k++) {
+      tempTotal += list[i].percentPassing[k];
+      totalData++;
+    }
+    var avg = tempTotal / totalData;
+    if (avg >= .70) {
+      passed = "yes (" + String(Math.round(avg * 100) / 100) + ")";
+    } else {
+      passed = "no (" + String(Math.round(avg * 100) / 100) + ")";
+    }
+    outputStr += list[i].course + " " + list[i].semester + " Passed: " + passed + ", Complete Data: " + list[i].complete + "\n";
+  }
+  document.getElementById("trackLO").innerText = outputStr;
+
 }
 
 function createWorkBook(excelSheet, sheetNum) {
@@ -516,7 +568,15 @@ createWorkBook(excel_file, 0);
 var divArr = ['myDiv1', 'myDiv2', 'myDiv3', 'myDiv4', 'myDiv5', 'myDiv6', 'myDiv7', 'myDiv8', 'myDiv9', 'myDiv10', 'myDiv11'];
 
 function doGraph() {
-  graphLOutcome(learningOutcomes[0]);
+  var userInput = document.getElementById("graphLOinput").value;
+  for (var i = 0; i < learningOutcomes.length; i++) {
+    if (userInput == learningOutcomes[i].number) {
+      graphLOutcome(learningOutcomes[i]);
+    } else {
+      continue;
+    }
+  }
+
 }
 
 function graphLOutcome(learnOutObject) {
@@ -537,7 +597,6 @@ function graphLOutcome(learnOutObject) {
       }
     }
   }
-  console.log(list);
 
   for (var k = 0; k < list.length; k++) {
     var tempArr = [list[k]];
@@ -551,7 +610,6 @@ function graphLOutcome(learnOutObject) {
   }
 
   for (var m = 0; m < finalList.length; m++) {
-    console.log(finalList[m]);
     createGraph(finalList[m], learnOutObject.number, divArr[m]);
   }
 
