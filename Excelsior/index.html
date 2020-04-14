@@ -302,11 +302,11 @@
                           <input type="text" id="courseName"/>
                       </div>
                       <div class="formBox">
-                          <label for="desc">Offering Frequency</label>
+                          <label for="desc">Offering Frequency (Spring 2012, Fall 2013, ...)</label>
                           <input type="text" id="offeringFreq"/>
                       </div>
                       <div class="formBox">
-                          <button id="btn">Click to Add</button>
+                          <button id="btn2">Click to Add</button>
                       </div>
                   </form>
             </div>
@@ -360,17 +360,12 @@ var excel_file = $('#input-excel');
       });
     }
 
-var le1;
-var le2;
-var le3;
-var le4;
 
-var learnObjTitleArr;
 
 var offeringArray = []; //this is the array that holds every offering of each class imported
 
 class CourseOffering {
-  constructor(courseName, lObjs, sem, at1, at2, at3, at4m, perPass, compl) {
+  constructor(courseName, lObjs, sem, at1, at2, at3, at4m, perPass, compl = 0) {
     this.course = courseName; //self explanatory
     this.lObjList = lObjs; //array of learning objectives for this offering
     this.semester = sem; //the semester this is offered
@@ -379,13 +374,40 @@ class CourseOffering {
     this.studLev3 = at3; //array of # of students with score 3
     this.studLev4m = at4m; //array of # of students with score 4 or 5
     this.percentPassing = perPass; //array of %'s of students who passed
-    this.complete = compl; //this is if the data is complete or not
+    this.complete = compl; //this is if the data is complete or not (0 is incomplete, 1 is complete)
   }
 }
 
+function semesterCode(code) {
+  var outputStr = "";
+  var yearStr = "";
+  var yearEndStr = code[6] + code[7];
+  if (code[5] == "0") {
+    yearStr += ("19");
+  } else if (code[5] == "1") {
+    yearStr += ("20");
+  }
+  yearStr += yearEndStr;
+  if (code[8] == "1") {
+    outputStr += ("Spring ");
+  } else if (code[8] == "4") {
+    outputStr += ("Summer ");
+  } else if (code[8] == "7") {
+    outputStr += ("Fall ");
+  } else if (code[8] == "8") {
+    outputStr += ("Winter ");
+  }
+  outputStr += (yearStr);
+
+  return outputStr;
+}
+
 function learnOutcomeTrack() {
+  var opStr;
   var lO;
+  var inpCourseList = [];
   var userInput = document.getElementById("LOinput").value;
+
   for (var i = 0; i < learningOutcomes.length; i++) {
     if (userInput == learningOutcomes[i].number) {
       lO = learningOutcomes[i];
@@ -394,40 +416,68 @@ function learnOutcomeTrack() {
       continue;
     }
   }
-  var list = [];
-  var outputStr = "";
-  var courses = lO.courses.split(",");
-  for (var i = 0; i < offeringArray.length; i++){
-    for (var j = 0; j < courses.length; j++){
-      if (offeringArray[i].course == courses[j]) {
-        for (var h = 0; h < offeringArray[i].lObjList.length; h++){
-          if (offeringArray[i].lObjList[h][6] == lO.number) {
-            list.push(offeringArray[i]);
-            break;
-          }
+
+  var frequencyList;
+  var tempObj;
+  var lOcourses = lO.courses.split(",");
+
+  for (var i = 0; i < lO.courses.length; i++) { // goes through all the courses from the user created learning outcome
+    for (var j = 0; j < courses.length; j++) { // for each of those courses go through the user created courses
+      if (lOcourses[i] == courses[j].name) { // if the learning objective course matches one of the user created courses
+        frequencyList = courses[j].frequency.split(", "); // make a list of the offerings of the user created course
+        for (var k = 0; k < frequencyList.length; k++) { //for each offering in this list
+          tempObj = new CourseOffering(courses[j].name)
+          tempObj.semester = frequencyList[k];
+          inpCourseList.push(tempObj); // create a new user created courseOffering with coursename and a semester
+          // console.log(inpCourseList);
         }
-      } else {
-        continue;
       }
     }
   }
-  for (var i = 0; i < list.length; i++) {
-    var passed;
-    var tempTotal = 0;
-    var totalData = 0;
-    for (var k = 0; k < list[i].percentPassing.length; k++) {
-      tempTotal += list[i].percentPassing[k];
-      totalData++;
+
+  for (var l = 0; l < inpCourseList.length; l++) { // goes through all the user created courseOfferings
+    for (var m = 0; m < offeringArray.length; m++) { // for each of the offerings in offeringArray
+      if (inpCourseList[l].semester == offeringArray[m].semester && inpCourseList[l].course == offeringArray[m].course) { // if sem and coursename matches
+        inpCourseList[l] = offeringArray[m]; //replace it in the array with the courseOffering from offeringArray
+        inpCourseList[l].complete = 1;
+      }
     }
-    var avg = tempTotal / totalData;
-    if (avg >= .70) {
-      passed = "yes (" + String(Math.round(avg * 100) / 100) + ")";
-    } else {
-      passed = "no (" + String(Math.round(avg * 100) / 100) + ")";
-    }
-    outputStr += list[i].course + " " + list[i].semester + " Passed: " + passed + ", Complete Data: " + list[i].complete + "\n";
   }
-  document.getElementById("trackLO").innerText = outputStr;
+
+  for (var i = 0; i < inpCourseList.length; i++) {
+      var passed;
+      var complete;
+      var tempTotal = 0;
+      var totalData = 0;
+      if (inpCourseList[i].percentPassing != undefined) {
+        for (var k = 0; k < inpCourseList[i].percentPassing.length; k++) {
+          tempTotal += inpCourseList[i].percentPassing[k];
+          totalData++;
+        }
+
+      var avg = tempTotal / totalData;
+
+      if (avg >= .70) {
+        passed = "yes (" + String(Math.round(avg * 100) / 100) + ")";
+      } else {
+        passed = "no (" + String(Math.round(avg * 100) / 100) + ")";
+      }
+    }
+
+      if (inpCourseList[i].complete == 0) {
+        complete = "No";
+      } else if (inpCourseList[i].complete == 1) {
+        complete = "Yes";
+      }
+
+      if (complete == "Yes") {
+        opStr += inpCourseList[i].course + " " + inpCourseList[i].semester + " Passed: " + passed + ", Complete Data: " + complete + "\n";
+      } else if (complete == "No") {
+        opStr += inpCourseList[i].course + " " + inpCourseList[i].semester + " Incomplete Data" + "\n";
+      }
+
+    }
+    document.getElementById("trackLO").innerText = opStr;
 
 }
 
@@ -441,6 +491,7 @@ function createWorkBook(excelSheet, sheetNum) {
             var cellRow;
             var cellCol;
             var lObjTitles = [];
+            var learnObjTitleArr;
 
             var data = new Uint8Array(reader.result);
             var wb = XLSX.read(data,{type:'array'});
@@ -573,7 +624,7 @@ function createWorkBook(excelSheet, sheetNum) {
 
   for (var k = 0; k < (sheets.length - 3); k++) { //this is the for loop that creates all the objects and throws them into an Array
     var data = multiSheet(wsArr[k], String(sheets[k]));
-    offeringArray.push(new CourseOffering(learnObjTitleArr[0].substr(0, 5), learnObjTitleArr, String(sheets[k]), data[0][0], data[0][1], data[0][2], data[0][3], data[1]));
+    offeringArray.push(new CourseOffering(learnObjTitleArr[0].substr(0, 5), learnObjTitleArr, semesterCode(String(sheets[k])), data[0][0], data[0][1], data[0][2], data[0][3], data[1]));
       }
     }
   });
@@ -713,6 +764,7 @@ function createGraph(courseOfferingList, learnOutcome, div) {
 
 function consoleTest(){ //actually has functionality
   console.log(offeringArray);
+  console.log(courses);
   // if(fileTest){
   //   var foo = document.getElementById('dataArray');
   //   foo.value = JSON.stringify(fileData.concat(offeringArray));
@@ -759,7 +811,7 @@ function consoleTest(){ //actually has functionality
                 frequency: document.getElementById('offeringFreq').value
             }
             courses.push(course);
-            document.forms[0].reset(); // to clear the form for the next entries
+            document.forms[1].reset(); // to clear the form for the next entries
 
 			      //testing file output
 			      var loString = JSON.stringify(courses);
@@ -776,6 +828,9 @@ function consoleTest(){ //actually has functionality
         }
         document.addEventListener('DOMContentLoaded', ()=>{
             document.getElementById('btn').addEventListener('click', addLO);
+        });
+        document.addEventListener('DOMContentLoaded', ()=>{
+            document.getElementById('btn2').addEventListener('click', addCourses);
         });
 
 
