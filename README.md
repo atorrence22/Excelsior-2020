@@ -5,40 +5,30 @@ AMTV
 ABET Monitoring Tool & Visualization\
 CS486 Capstone 2020 team Excelsior
 
-Go to:
+To contribute to development:
 
-https://nodejs.org/en/
+Install nodejs & add path of NodeJS to Environment Variables (https://nodejs.org/en/)
 
-Install
+- To test if done correctly, open CMD and type npm -version, if Done correctly then current version will show
 
-nodejs on your computer.
 
-Add the path of Nodejs to your Environment Variable by typing: Environment Viarble in start menu
 
-Click on Environment Variable on the Advance tab.
+Installing electron 
 
-Highlight Path by clicking onit and click on the New.
+- cd to desired project directory
 
-Past the path into and click Ok
+ - open cmd and cd to where you want to AMTV to be
 
-To test if done correctly, open CMD and type npm -version.
+- npm install --save-dev electron
 
-if Done correctly then a version will show up other wise redo Path step.
 
-Installing electron by cd to where you want to build your project
 
-open cmd and cd to where you want to AMTV to be
+Running App
 
-type: npm install --save-dev electron
+- clone repository into aforementioned directory
 
-next download our AMTV zip file
+- Open CMD and cd to location of AMTV 
 
-unzip to location of AMTV
-
-Open CMD and cd to location of AMTV 
-
-cd until you see a scr folder
-
-type npm start
+- run file names "run-to-start.bat"
 
 
