@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AMTV</title>
+    <link rel="stylesheet" href="css/bulma.css">
+    <link rel="stylesheet" href="styling.css">
+    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+    <script src="Dependencies/jquery-3.4.1.min.js" ></script>
+    <script src="Dependencies/xlsx.full.min.js"></script>
+    <script src="Dependencies/plotly-latest.min.js"></script>
+    <script src="plotly_func.js"></script>
+    <script src="LO_Course_help_func.js"></script>
+    <script src="LOTrack_func.js"></script>
+    <script>if (window.module) module = window.module;</script>
+
+    <!-- OR use a specific plotly.js release (e.g. version 1.5.0) -->
+    <script src="Dependencies/24bd548384.js" crossorigin="anonymous"></script>
+
+  </head>
+  <body>
+  <section class="section level has-background-white">
+    <div class=level-left>
+        <img src="img/logo.png" class="level-item" style="width:auto; height:auto; max-width:150px; max-height:60px; padding-right: 20px">
+    </div>
+    <div class="container">
+      <h1 class="title">
+        AMTV - ABET Monitoring Tool & Visualization
+      </h1>
+      <p class="subtitle">
+        Created by Team Excelsior
+      </p>
+    </div>
+    <div class="level-right">
+        <img src="img/build.png" style="padding-right: 5px">
+        <p class="level-item">Config</p>
+    </div>
+  </section>
+  <section class="section has-background-link">
+    <div class="columns">
+        <div class="column">
+            <div class="box is-half has-background-light">
+                <div id="navbar"><span>Select ABET data file</span></div>
+                <div id="wrapper">
+                  <div id="file-js-example" class="file has-name">
+                    <label class="file-label">
+                      <input class="file-input" type="file" id="input-excel" onclick="fileCreate()">
+                      <span class="file-cta">
+                        <span class="file-icon">
+                          <i class="fas fa-upload"></i>
+                        </span>
+                        <span class="file-label">
+                          Choose a file…
+                        </span>
+                      </span>
+                      <span class="file-name">
+                        No file uploaded
+                      </span>
+                    </label>
+                  </div>
+                <p>Please individually load each excel file</p>
+                <br>
+            </div>
+            <button onclick="reloadPage()">Refresh</button>
+          </div>
+        <!--</div>
+        <div class="column">-->
+            <div class="box is-half has-background-light" id="collBox">
+              <div id="locationBox">
+                </div>
+            </div>
+        </div>
+
+        <div class="column">
+            <div class="box is-half has-background-light">
+                <!-- Matt's code -->
+                    <form>
+                        <div class="formBox">
+                            <label for="number">Learning Outcome Number/Letter</label>
+                            <br><input type="text" id="loNumber"/></br>
+                        </div>
+                        <div class="formBox">
+                            <label for="desc">Description</label>
+                            <br><input type="text" id="loDescription"/></br>
+                        </div>
+                		<div class="formBox">
+                            <label for="course" >Courses (CS301, CS486, ...)</label>
+                            <br><input type="text" id="loCourses" style="margin-bottom: 5px"/></br>
+                        </div>
+                        <div class="formBox">
+                          <button class="button" id="addBtn" type="button"><img src="img/add.png" style="padding-right: 5px">Add Learning Outcome</button>
+                            <!-- <input class="button" type="submit" value="loCourses" onclick="learnOutcomeTrack()"></input> -->
+                        </div>
+                        <!--this div is for display-->
+                        <input type="hidden" id="msg" name="msg"/><br></br>
+                		<!-- <div id="msg">
+                            <pre></pre>
+                        </div> -->
+                    </form>
+                <!-- Popup Form \/ -->
+
+                <!-- popup form ^ -->
+                <form>
+                    <div class="formBox">
+                        <label for="courseName">Course Name</label>
+                        <br><input type="text" id="courseName" required="required"></br>
+                    </div>
+                    <div class="formBox">
+                        <label for="offeringFreq">Offering Frequency (Spring 2012, Fall 2013, ...)</label>
+                        <br><input type="text" id="offeringFreq" required="required"></br>
+                    </div>
+                    <div class="formBox">
+                        <button id="btn2" class="button">Click to Add</button>
+                    </div>
+                </form>                            
+                
+            </div>
+            <div class="box is-half has-background-light">
+              <div id="localCourseBox"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+        <section class="section has-background-link">
+          <div class="columns">
+            <div class="column">
+                <div class="box is-half has-background-light">
+                  <div id='myDiv1' >
+                  </div>
+                      <div id='myDiv3' >
+                  </div>
+                      <div id='myDiv5' >
+                  </div>
+                      <div id='myDiv7' >
+                  </div>
+                      <div id='myDiv9' >
+                  </div>
+                      <div id='myDiv11' >
+                  </div>
+                </div>
+            </div>
+            <div class="column">
+              <div class="box is-half has-background-light">
+                      <div id='myDiv2' >
+                  </div>
+                      <div id='myDiv4' >
+                  </div>
+                      <div id='myDiv6' >
+                  </div>
+                      <div id='myDiv8' >
+                  </div>
+                      <div id='myDiv10' >
+                  </div>
+                      <div id='myDiv12' >
+                  </div>
+                </div>
+            </div>
+          </div>
+          </section>
+              <input type="hidden" id="dataArray" name="dataArray">
+<script>
+const LocalStorage = require('node-localstorage').LocalStorage;
+let localStorage = new LocalStorage('./config');
+var fileString = localStorage.getItem('data_file');
+var fileData;
+if(fileString){
+  fileData = JSON.parse(fileString);
+  offeringArray = fileData;
+}
+var learnString = localStorage.getItem('MyLearningOutcomes');
+var learnData;
+ if(learnString){
+   learnData = JSON.parse(learnString);
+ }
+
+
+ var offeringArray = []; //this is the array that holds every offering of each class imported
+
+ function reloadPage() {
+  window.location.reload(false);
+ }
+
+
+var learnFile = localStorage.getItem('MyLearningOutcomes');
+var learning_file;
+if(learnFile){
+  learning_file = JSON.parse(learnFile);
+}
+
+// let learningOutcomes = [];
+var coll = document.getElementsByClassName("collapsible");
+
+var i;
+
+const fileInput = document.querySelector('#file-js-example input[type=file]');
+fileInput.onchange = () => {
+  if (fileInput.files.length > 0) {
+    const fileName = document.querySelector('#file-js-example .file-name');
+    fileName.textContent = fileInput.files[0].name;
+  }
+}
+
+var excel_file = $('#input-excel');
+
+    for (i = 0; i < coll.length; i++) {
+        coll[i].addEventListener("click", function() {
+        this.classList.toggle("active");
+        var content = this.nextElementSibling;
+        if (content.style.maxHeight){
+            content.style.maxHeight = null;
+        } else {
+            content.style.maxHeight = content.scrollHeight + "px";
+        }
+      });
+    }
+
+
+
+
+function createWorkBook(excelSheet, sheetNum) {
+  excelSheet.change(function(e){
+          var reader = new FileReader();
+          reader.readAsArrayBuffer(e.target.files[0]);
+          reader.onload = function(e) {
+            var queueText = "Summary";
+            var queueCell;
+            var cellRow;
+            var cellCol;
+            var lObjTitles = [];
+            var learnObjTitleArr;
+
+            var data = new Uint8Array(reader.result);
+            var wb = XLSX.read(data,{type:'array'});
+
+            var sheets = wb.SheetNames;
+            var sheetsArr = [];
+            var wsArr = [];
+            for (var i = 0; i < (sheets.length - 3); i++) {
+              sheetsArr.push(sheets[sheetNum + i]);
+            }
+
+            for (var j = 0; j < (sheets.length - 3); j++) {
+              wsArr.push(wb.Sheets[sheetsArr[j]]);
+            }
+
+
+            function multiSheet(ws, sheetName) { //creates 1 CourseOffering object per offering of the class 
+              lObjTitles = [];
+              var range = XLSX.utils.decode_range(ws['!ref']); // get the range
+              for(var R = range.s.r; R <= range.e.r; ++R) {
+                for(var C = range.s.c; C <= range.e.c; ++C) {
+                  /* find the cell object */
+                  var cellref = XLSX.utils.encode_cell({c:C, r:R}); // construct A1 reference for cell
+                  if(!ws[cellref]) continue; // if cell doesn't exist, move on
+                  var cell = ws[cellref];
+
+                  /* if the cell is a text cell with the correct value (summary) then set the queue cell to that cell */
+                  if(!(cell.t == 's' || cell.t == 'str')) continue; // skip if cell is not text
+                  if(cell.v === queueText) queueCell = cellref; // we are now setting the queue Cell (Summary) so that we can find all the other desired cells
+                }
+              }
+
+              if (queueCell.length == 3) { //checks queue cell length and creates 2 variables for queueCell row and column
+                var s1 = queueCell[1];
+                var s2 = queueCell[2];
+                cellRow = s1.concat(s2);
+                cellCol = queueCell[0];
+              } else if(queueCell.length == 2) {
+                cellRow = queueCell[1];
+                cellCol = queueCell[0];
+              }
+              else if (queueCell.length == 4) {
+                var s1 = queueCell[1];
+                var s2 = queueCell[2];
+                var s3 = queueCell[3];
+                var st = s1.concat(s2);
+                cellRow = st.concat(s3);
+                cellCol = queueCell[0];
+              }
+
+
+              function nextColVal(curCol) { //this takes in a str of a col and returns VALUE of next item
+                var albet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
+                 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+                var cnt = 0;
+                var nxtCol;
+                var i;
+                for (i = 0; i < albet.length; i++) {
+                  if (albet[i] == curCol) {
+                    cnt++;
+                    nxtCol = albet[cnt];
+                    break;
+                  } else {
+                    cnt++;
+                  }
+                }
+                return nxtCol;
+              }
+
+      function createlObjArr(summaryCellRow, summaryCellCol) { //creates an array of the learning objectives for this class
+        var nxtCol = nextColVal(summaryCellCol);
+        var curCell = nxtCol.concat(summaryCellRow);
+        while (!ws[curCell] == false) {
+          lObjTitles.push(ws[curCell].v);
+          nxtCol = nextColVal(nxtCol);
+          curCell = nxtCol.concat(summaryCellRow);
+        }
+      }
+
+      createlObjArr(cellRow, cellCol);
+      learnObjTitleArr = lObjTitles;
+
+      function fillLe(qRow, qCol, le, x) { //this takes in the queue row and column and fills in an array with the values for this learning objective column
+        var nxtCol = nextColVal(qCol);
+        var nxtRow = Number(qRow) + x;
+        var nxtRowStr = String(nxtRow);
+        var curCell = nxtCol.concat(nxtRowStr);
+        while (!ws[curCell] == false) {
+          le.push(ws[curCell].v);
+          nxtCol = nextColVal(nxtCol);
+          curCell = nxtCol.concat(nxtRowStr);
+        }
+      }
+
+      var tempLe1 = [];
+      var tempLe2 = [];
+      var tempLe3 = [];
+      var tempLe4 = [];
+      var perPassArr = [];
+
+      fillLe(cellRow, cellCol, tempLe1, 1);
+      fillLe(cellRow, cellCol, tempLe2, 2);
+      fillLe(cellRow, cellCol, tempLe3, 3);
+      fillLe(cellRow, cellCol, tempLe4, 4);
+      fillLe(cellRow, cellCol, perPassArr, 5);
+
+      var wle1 = [];
+      var wle2 = [];
+      var wle3 = [];
+      var wle4 = [];
+      var wleArr = [wle1, wle2, wle3, wle4];
+      var tempSum;
+
+      for (var i = 0; i < tempLe1.length; i++) {
+        var temp1 = tempLe1[i];
+        var temp2 = tempLe2[i];
+        var temp3 = tempLe3[i];
+        var temp4 = tempLe4[i];
+        tempSum = temp1 + temp2 + temp3 + temp4;
+        wle1.push((tempLe1[i]/tempSum) * 100);
+        wle2.push((tempLe2[i]/tempSum) * 100);
+        wle3.push((tempLe3[i]/tempSum) * 100);
+        wle4.push((tempLe4[i]/tempSum) * 100);
+      }
+
+      var leArray = [wle1, wle2, wle3, wle4];
+
+      return [leArray, perPassArr];
+  }
+
+  for (var k = 0; k < (sheets.length - 3); k++) { //this is the for loop that creates all the objects and throws them into an Array
+    var data = multiSheet(wsArr[k], String(sheets[k]));
+    offeringArray.push(new CourseOffering(learnObjTitleArr[0].substr(0, 5), learnObjTitleArr, semesterCode (String(sheets[k])), data[0][0], data[0][1], data[0][2], data[0][3], data[1]));
+      }
+    }
+  });
+}
+
+
+createWorkBook(excel_file, 0);
+
+var divArr = ['myDiv1', 'myDiv2', 'myDiv3', 'myDiv4', 'myDiv5', 'myDiv6', 'myDiv7', 'myDiv8', 'myDiv9', 'myDiv10', 'myDiv11'];
+
+
+function fileName(){
+  var theFile = document.getElementById('input-excel');
+  return theFile.value;
+}
+
+
+function fileCreate(){
+setTimeout(
+function creata_file(){
+  //setTimeout()
+  if(fileString){
+    var foo = document.getElementById('dataArray');
+    foo.value = JSON.stringify(fileData);
+    localStorage.setItem('data_file', JSON.stringify(fileData) );
+  }
+  else {
+    var foo = document.getElementById('dataArray');
+    foo.value = JSON.stringify(offeringArray);
+    localStorage.setItem('data_file', JSON.stringify(offeringArray) );
+  }
+}, 5000);
+};
+
+
+//reload data
+function reloadFile() {
+  if(offeringArray.length == 0){
+    offeringArray = fileData;
+  }
+  if (learnData) {
+    learningOutcomes = learnData;
+  }
+  var lO;
+  var numbe = 0;
+  for ( var x = 0; x < learnData.length; x++) {
+     let lO = learnData[x];
+  var list = [];
+  var outputStr = "";
+  var courses = lO.courses.split(", ");
+  for (var i = 0; i < offeringArray.length; i++){
+    for (var j = 0; j < courses.length; j++){
+      if (offeringArray[i].course == courses[j]) {
+        for (var h = 0; h < offeringArray[i].lObjList.length; h++){
+          if (offeringArray[i].lObjList[h][6] == lO.number) {
+            list.push(offeringArray[i]);
+            break;
+          }
+        }
+      }
+      else {
+        continue;
+      }
+    }
+  }
+
+  for (var i = 0; i < list.length; i++) {
+    var passed;
+    var tempTotal = 0;
+    var totalData = 0;
+    for (var k = 0; k < list[i].percentPassing.length; k++) {
+      tempTotal += list[i].percentPassing[k];
+      totalData++;
+    }
+    var avg = tempTotal / totalData;
+    if (avg >= .70) {
+      passed = "yes (" + String(Math.round(avg * 100) / 100) + ")";
+    } else {
+      passed = "no (" + String(Math.round(avg * 100) / 100) + ")";
+    }
+    list[i].passed = passed;
+  }
+
+
+  var location = document.getElementById('locationBox');
+  var button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'collapsible';
+  button.textContent = "Learning Outcome " + learnData[numbe].number;
+  location.appendChild(button);
+  var divContent = document.createElement('div');
+  divContent.className = 'content is-collapsible';
+  var divTable = document.createElement('div');
+  divTable.className = 'table is-narrow is-hoverable is-fullwidth';
+  var tableTag = document.createElement('table');
+  tableTag.className = 'table';
+  tableTag.id = 'outputTable';
+  location.appendChild(divContent);
+  divContent.appendChild(divTable);
+  divTable.appendChild(tableTag);
+
+  let data = Object.keys(list[0]);
+  generateTable(tableTag, list, learnData[numbe].number);
+  generateTableHead(tableTag, data);
+  numbe++;
+
+  button.addEventListener("click", function() {
+  this.classList.toggle("active");
+  var content = this.nextElementSibling;
+  if (content.style.maxHeight){
+      content.style.maxHeight = null;
+    }
+  else {
+      content.style.maxHeight = content.scrollHeight + "px";
+    }
+  });
+  }
+}
+
+function addCourse(course, semester) {
+    if(fileString){
+        offeringArray = fileData;
+    }
+
+    // localStorage.setItem("course",course);
+    // localStorage.setItem("inputList",semester);  
+    var inputList = [];
+    var list = [];
+
+    inputList = semester.split(", ");
+    
+
+    for (var x = 0; x < inputList.length; x++) {
+      
+      for (var y = 0; y < offeringArray.length; y++) {
+        if (inputList[x] == offeringArray[y].semester && course == offeringArray[y].course) {
+          break;
+        } 
+        let temp = (offeringArray.length - 1);
+        if (y == temp) {
+          offeringArray.push(new CourseOffering(course, null, inputList[x], null, null, null, null, null, 1));
+        }
+      }
+    }
+
+    for(var i = 0; i < offeringArray.length; i++){      
+      if(offeringArray[i].course == course){        
+          list.push(offeringArray[i]);
+        } else {
+          continue;
+        }
+      }
+
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].complete == 1) {
+        continue;
+      }
+      var passed;
+      var tempTotal = 0;
+      var totalData = 0;
+      for (var k = 0; k < list[i].percentPassing.length; k++) {
+        tempTotal += list[i].percentPassing[k];
+        totalData++;
+      }
+      var avg = tempTotal / totalData;
+      if (avg >= .70) {
+        passed = "yes (" + String(Math.round(avg * 100) / 100) + ")";
+      } else {
+        passed = "no (" + String(Math.round(avg * 100) / 100) + ")";
+      }
+      list[i].passed = passed;
+    }
+
+  // creating collapse bar
+    var location = document.getElementById('localCourseBox');
+    var button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'collapsible';
+    button.textContent = "Course " + course;
+    location.appendChild(button);
+    var divContent = document.createElement('div');
+    divContent.className = 'content is-collapsible';
+    var divTable = document.createElement('div');
+    divTable.className = 'table is-narrow is-hoverable is-fullwidth';
+    var tableTag = document.createElement('table');
+    tableTag.className = 'table';
+    tableTag.id = 'outputTable';
+    location.appendChild(divContent);
+    divContent.appendChild(divTable);
+    divTable.appendChild(tableTag);
+    
+    let data = Object.keys(list[0]);
+    generateTableCourse(tableTag, list, course);
+    generateTableHead(tableTag, data);
+
+   // creating table accordian style
+    button.addEventListener("click", function() {
+    this.classList.toggle("active");
+    var content = this.nextElementSibling;
+    if (content.style.maxHeight){
+        content.style.maxHeight = null;
+      }
+    else {
+        content.style.maxHeight = content.scrollHeight + "px";
+      }
+    });
+  }
+
+  function reloadCour(){
+    var courseString = localStorage.getItem("MyCourses");
+    if(courseString){
+      var coursesData = JSON.parse(courseString);
+    }
+    courses = coursesData;
+    for(var i = 0; i < coursesData.length; i++){
+      var course = coursesData[i].courses;
+      var semester = coursesData[i].frequency;
+      addCourse(course, semester);
+    }
+  }
+
+// import file fuction and save data to list
+function inputFilesData(number) {
+  var lO;
+//  var userInput = document.getElementById("LOinput").value;
+  for (var i = 0; i < learningOutcomes.length; i++) {
+    if (number == learningOutcomes[i].number) {
+      lO = learningOutcomes[i];
+      break;
+    } else {
+      continue;
+    }
+  }
+  var list = [];
+  var outputStr = "";
+  var courses = lO.courses.split(", ");
+  for (var i = 0; i < offeringArray.length; i++){
+    for (var j = 0; j < courses.length; j++){
+      if (offeringArray[i].course == courses[j] && offeringArray[i].complete != 1) {
+        for (var h = 0; h < offeringArray[i].lObjList.length; h++){
+          if (offeringArray[i].lObjList[h][6] == lO.number) {
+            list.push(offeringArray[i]);
+            break;
+          }
+          // else {
+          //   list.push(offeringArray);
+          // }
+        }
+      } else {
+        continue;
+      }
+    }
+  }
+
+let table = document.getElementById("outputTable");
+
+  for (var n = 0; n < learnFile; n++){}
+
+
+
+  for (var i = 0; i < list.length; i++) {
+    var passed;
+    var tempTotal = 0;
+    var totalData = 0;
+    for (var k = 0; k < list[i].percentPassing.length; k++) {
+      tempTotal += list[i].percentPassing[k];
+      totalData++;
+    }
+    var avg = tempTotal / totalData;
+    if (avg >= .70) {
+      passed = "yes (" + String(Math.round(avg * 100) / 100) + ")";
+    } else {
+      passed = "no (" + String(Math.round(avg * 100) / 100) + ")";
+    }
+    list[i].passed = passed;
+  }
+  return list;
+}
+
+var id = [];
+var clean = [];
+
+
+let learningOutcomes = [];
+let courses = [];
+
+
+        // adding learning outcome
+        const addLO = (ev)=>{
+            ev.preventDefault();  //to stop the form submitting
+            let learningOutcome = {
+                number: document.getElementById('loNumber').value,
+                description: document.getElementById('loDescription').value,
+				        courses: document.getElementById('loCourses').value
+            }
+            // user input error handling
+              if (!learningOutcome.number || !learningOutcome.courses) {
+                  alert("Please fill out all fields");
+            } else {                
+                learningOutcomes = learnData;
+                learningOutcomes.push(learningOutcome);
+                document.forms[0].reset();
+              
+                var loString = JSON.stringify(learningOutcomes);
+                var fs = require('fs');
+                try { fs.writeFileSync('./config/myfile.txt', loString, 'utf-8'); }
+                catch(err) { alert(err);}//alert('Failed to save the file !'); }
+                      //for display purposes only
+                      console.warn("added" , {learningOutcomes} );
+                      document.addEventListener('DOMContentLoaded', ()=>{
+                        let pre = document.querySelector('#msg pre');
+                        pre.textContent = '\n' + JSON.stringify(learningOutcomes, '\t', 2);
+                      });
+
+                      //saving to localStorage
+                      localStorage.setItem('MyLearningOutcomes', JSON.stringify(learningOutcomes) );
+                      learnData = learningOutcomes;
+                      showData(learningOutcome.number);
+                    }       
+        }
+
+
+        // adding courses
+        const addCourses = (ev)=>{
+            ev.preventDefault();  //to stop the form submitting
+            let course = {
+                courses: document.getElementById('courseName').value,
+                frequency: document.getElementById('offeringFreq').value
+            }
+            courses.push(course);
+            addCourse(course.courses, course.frequency)
+            document.forms[1].reset(); // to clear the form for the next entries
+
+			      //testing file output
+			      var loString = JSON.stringify(courses);
+			      var fs = require('fs');
+			      try { fs.writeFileSync('myfile.txt', loString, 'utf-8'); }
+			      catch(e) { alert('Failed to save the file !'); }
+            //for display purposes only
+            console.warn('added' , {courses} );
+            var pre = document.querySelector('#msg pre');
+            if(pre){
+              pre.textContent = '\n' + JSON.stringify(courses, '\t', 2);
+            }
+            //saving to localStorage
+            localStorage.setItem('MyCourses', JSON.stringify(courses) );
+        }
+        var addbtn = document.getElementById('addBtn');
+        if(addbtn){
+          addbtn.addEventListener('click', addLO);
+        }
+        var addbtn2 = document.getElementById('btn2');
+        if(addbtn2){
+          addbtn2.addEventListener('click', addCourses);
+        }
+        document.addEventListener('DOMContentLoaded', reloadFile(),reloadCour());
+
+    </script>
+  </body>
+</html>
