@@ -31,4 +31,12 @@ Running App
 
 - run file names "run-to-start.bat"
 
+--------
 
+Running Built Application
+
+- if built on your machine, go to AMTV directory and locate "out" folder
+
+- locate make folder and traverse through folders until you find "AMTV-1.0.0 Setup.exe"
+
+- once run the program will show up on your desktop which can be run from there
